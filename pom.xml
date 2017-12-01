@@ -36,6 +36,13 @@
                 <role>Architect</role>
             </roles>
         </developer>
+	<developer>
+            <name>Borut Terpinc</name>
+            <organization>ITER</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </developer>
     </developers>
     <scm>
         <connection>scm:git:ssh://git@github.com/${github.projectOwner}/${github.projectName}.git</connection>
@@ -174,11 +181,6 @@
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.4.6</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.1-901.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.openejb</groupId>
@@ -331,7 +333,7 @@
     	<profile>
     		<id>mysql</id>
     		<activation>
-    			<activeByDefault>true</activeByDefault>
+    			<activeByDefault>false</activeByDefault>
     		</activation>
     		<dependencies>
 		        <dependency>
@@ -344,13 +346,13 @@
     	<profile>
     		<id>postgres</id>
     		<activation>
-    			<activeByDefault>false</activeByDefault>
+    			<activeByDefault>true</activeByDefault>
     		</activation>
     		<dependencies>
 				<dependency> 
-					<groupId>postgresql</groupId>
-					<artifactId>postgresql</artifactId>
-					<version>9.2-1001.jdbc4</version>
+				    <groupId>org.postgresql</groupId>
+				    <artifactId>postgresql</artifactId>
+				    <version>42.1.4</version>
 				</dependency>
     		</dependencies>
     	</profile>
