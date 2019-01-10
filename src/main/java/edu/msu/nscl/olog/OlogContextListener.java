@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import org.apache.ddlutils.PlatformUtils;
 import org.apache.ddlutils.platform.mysql.MySqlPlatform;
 import org.apache.ddlutils.platform.postgresql.PostgreSqlPlatform;
-import org.apache.jackrabbit.core.RepositoryImpl;
 
 import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.api.MigrationVersion;
@@ -39,7 +38,6 @@ public class OlogContextListener implements ServletContextListener {
 
     private static OlogContextListener instance = new OlogContextListener();
     private static ServletContext context;
-    private JCRUtil repo;
     @Inject
     private OlogImpl cm;
 
@@ -76,7 +74,7 @@ public class OlogContextListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent event) {
         JPAUtil.getEntityManagerFactory().close();
-        ((RepositoryImpl) repo.getRepository()).shutdown();
+        JCRUtil.shutdown();
         System.out.println("Olog JCR and JPA Sessions have been removed");
 
     }
@@ -133,7 +131,7 @@ public class OlogContextListener implements ServletContextListener {
             System.out.println("Database is up to date. ");
             DbConnection.getInstance().close();
 
-            repo = new JCRUtil();
+            new JCRUtil();
             try {
                 preCache();
             } catch (Exception e) {

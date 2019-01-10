@@ -32,22 +32,44 @@ public class AttachmentManager {
 
     private AttachmentManager() {
     }
+    
+    /**
+     * Find a Node by its absolute path in all JCR configured repositories.
+     * 
+     * @param path absolute path of node to find
+     * @return the resulting Node if found
+     * @throws PathNotFoundException if path is not found in any JCR repository 
+     * @throws RepositoryException if an error occurs.
+     */
+    public static Node findByAbsolutePath(String path) throws PathNotFoundException, RepositoryException {
+    	for(Session session : JCRUtil.getAllSessions()) {
+            Node rn = session.getRootNode();            
+            try {
+				Node folderNode = rn.getNode(path);
+				return folderNode;
+			} catch (PathNotFoundException e) {
+				// Not found here, proceed to search in next Session
+			}            
+    	}
+        throw new PathNotFoundException("Node '"+path+"' not found in any JCR session");    	
+    }
 
     public static List<Long> findAll(String searchTerm) throws OlogException {
         List<Long> ids = new ArrayList<Long>();
         try {
-            Session session = JCRUtil.getSession();
-            Workspace workspace = session.getWorkspace();
-            QueryManager qm = workspace.getQueryManager();
-            Query query = qm.createQuery("//element(*, nt:file)[jcr:contains(jcr:content, '" + searchTerm + "')]", Query.XPATH);
-            QueryResult qr = query.execute();
-            NodeIterator ni = qr.getNodes();
-            while (ni.hasNext()) {
-                Node node = ni.nextNode();
-                Node parent = node.getParent();
-                String name = parent.getName();
-                ids.add(Long.valueOf(name));
-            }
+        	for(Session session : JCRUtil.getAllSessions()) {
+	            Workspace workspace = session.getWorkspace();
+	            QueryManager qm = workspace.getQueryManager();
+	            Query query = qm.createQuery("//element(*, nt:file)[jcr:contains(jcr:content, '" + searchTerm + "')]", Query.XPATH);
+	            QueryResult qr = query.execute();
+	            NodeIterator ni = qr.getNodes();
+	            while (ni.hasNext()) {
+	                Node node = ni.nextNode();
+	                Node parent = node.getParent();
+	                String name = parent.getName();
+	                ids.add(Long.valueOf(name));
+	            }
+        	}
         } catch (LoginException e) {
             throw new OlogException(Response.Status.BAD_REQUEST,
                     "Search: " + searchTerm + " could not login to repository. " + e);
@@ -62,9 +84,8 @@ public class AttachmentManager {
     public static XmlAttachments findAll(Long logId) throws OlogException {
         XmlAttachments xmlAttachments = new XmlAttachments();
         try {
-            Session session = JCRUtil.getSession();
-            Node rn = session.getRootNode();
-            Node folderNode = rn.getNode(logId.toString());
+            Node folderNode = findByAbsolutePath(logId.toString());
+            Node rn = folderNode.getSession().getRootNode();
             NodeIterator nodes = folderNode.getNodes();
             while (nodes.hasNext()) {
                 Node contentNode = nodes.nextNode();
@@ -97,10 +118,7 @@ public class AttachmentManager {
         String mimeType = null;
         String[] arrayMimeType = null;
         try {
-            Session session = JCRUtil.getSession();
-            Node rn = session.getRootNode();
-            Node folderNode = rn.getNode(filePath);
-            Node contentNode = folderNode.getNode(fileName).getNode(JcrConstants.JCR_CONTENT);
+        	Node contentNode = findByAbsolutePath(filePath+"/"+fileName).getNode(JcrConstants.JCR_CONTENT);
             javax.jcr.Property dataProperty = contentNode.getProperty(JcrConstants.JCR_DATA);
             javax.jcr.Property mimeProperty = contentNode.getProperty(JcrConstants.JCR_MIMETYPE);
 
