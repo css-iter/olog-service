@@ -85,9 +85,9 @@ public class LogManager {
                 String key = match.getKey().toLowerCase();
                 Collection<String> matchesValues = match.getValue();
                 if (key.equals("search")) {
-                    log_patterns.addAll(mysqlSyntax(matchesValues, log_patterns));
+                    log_patterns.addAll(mysqlSyntax(matchesValues, new ArrayList<String>()));
                 } else if (key.equals("id")) {
-                    id_patterns.addAll(mysqlSyntax(matchesValues, id_patterns));
+                    id_patterns.addAll(mysqlSyntax(matchesValues, new ArrayList<String>()));
                 } else if (key.equals("tag")) {
                     for (String m : matchesValues) {
                         if (m.contains("?") || m.contains("*")) {
@@ -144,9 +144,9 @@ public class LogManager {
                         }
                     }
                 } else if (key.equals("owner")) {
-                    owner_patterns.addAll(mysqlSyntax(matchesValues, owner_patterns));
+                    owner_patterns.addAll(mysqlSyntax(matchesValues, new ArrayList<String>()));
                 } else if (key.equals("source")) {
-                    source_patterns.addAll(mysqlSyntax(matchesValues, source_patterns));
+                    source_patterns.addAll(mysqlSyntax(matchesValues, new ArrayList<String>()));
                 } else if (key.equals("page")) {
                     paginate_matches.putAll(key, match.getValue());
                 } else if (key.equals("limit")) {
