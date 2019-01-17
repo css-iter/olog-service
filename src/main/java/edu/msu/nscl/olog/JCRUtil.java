@@ -80,19 +80,22 @@ public class JCRUtil extends OlogContextListener {
     			String xmlContent = new String(Files.readAllBytes(Paths.get(xml)), StandardCharsets.UTF_8);
                 
                 for(String schema : fdwSchemas.split(",")) {
-                    System.out.println("Configuring additonal JCR to FDW schema '"+schema+"'");                
-    				File tmp = File.createTempFile(schema, "repository_db.xml");
-    				PrintWriter pw = new PrintWriter(tmp);    				
-                    // Replace table prefix to use Views created on FWD schema tables for JCR
-                    // We use views because JCR does not allow a schema prefix (with dot) in table name prefix
-    				String replaced = xmlContent.replaceAll("jcr_", schema+"_jcr_");
-    				// Set schemaCheckEnabled to FALSE (we don't have permission to create tables in any FWD schema)
-    				replaced = replaced.replaceAll("</FileSystem>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</FileSystem>");
-    				replaced = replaced.replaceAll("</DataStore>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</DataStore>");
-    				replaced = replaced.replaceAll("</PersistenceManager>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</PersistenceManager>");
-    				pw.write(replaced);
-    				pw.close();
-                    allSessions.add(RepositoryImpl.create(RepositoryConfig.create(tmp.getAbsolutePath(), dir+"_"+schema)).login(adminCred));            	                
+                	schema = schema.trim();
+                	if(!schema.equals("")) {
+                        System.out.println("Configuring additonal JCR to FDW schema '"+schema+"'");                
+        				File tmp = File.createTempFile(schema, "repository_db.xml");
+        				PrintWriter pw = new PrintWriter(tmp);    				
+                        // Replace table prefix to use Views created on FWD schema tables for JCR
+                        // We use views because JCR does not allow a schema prefix (with dot) in table name prefix
+        				String replaced = xmlContent.replaceAll("jcr_", schema+"_jcr_");
+        				// Set schemaCheckEnabled to FALSE (we don't have permission to create tables in any FWD schema)
+        				replaced = replaced.replaceAll("</FileSystem>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</FileSystem>");
+        				replaced = replaced.replaceAll("</DataStore>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</DataStore>");
+        				replaced = replaced.replaceAll("</PersistenceManager>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</PersistenceManager>");
+        				pw.write(replaced);
+        				pw.close();
+                        allSessions.add(RepositoryImpl.create(RepositoryConfig.create(tmp.getAbsolutePath(), dir+"_"+schema)).login(adminCred));            	                                		
+                	}
                 }
             } catch (NamingException e ) {
             }
