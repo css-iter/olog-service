@@ -94,10 +94,15 @@ public class JCRUtil extends OlogContextListener {
         				replaced = replaced.replaceAll("</PersistenceManager>", "\t<param name=\"schemaCheckEnabled\" value=\"false\" />\n\t</PersistenceManager>");
         				pw.write(replaced);
         				pw.close();
-                        allSessions.add(RepositoryImpl.create(RepositoryConfig.create(tmp.getAbsolutePath(), dir+"_"+schema)).login(adminCred));            	                                		
+        				try {
+        					allSessions.add(RepositoryImpl.create(RepositoryConfig.create(tmp.getAbsolutePath(), dir+"_"+schema)).login(adminCred));
+        				} catch (RepositoryException e) {
+        					Logger.getLogger(JCRUtil.class.getName()).log(Level.WARNING, "Failed to initialize FDW repository for "+schema, e);
+						}
                 	}
                 }
             } catch (NamingException e ) {
+            	Logger.getLogger(JCRUtil.class.getName()).log(Level.INFO, "JCR_FDW_SCHEMAS not configured");
             }
             
 
@@ -105,7 +110,7 @@ public class JCRUtil extends OlogContextListener {
 		} catch (IOException e) {
 			Logger.getLogger(JCRUtil.class.getName()).log(Level.SEVERE, "Error configuring JCR", e);
         } catch (RepositoryException ex) {
-            Logger.getLogger(JCRUtil.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(JCRUtil.class.getName()).log(Level.SEVERE, "RepositoryException configuring JCR", ex);
         }
     }
     
